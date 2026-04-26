@@ -427,6 +427,9 @@ HTML = r"""<!doctype html>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Athletics All-Time Performances</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
   <style>
     :root {
       --bg:      #05142c;
@@ -612,36 +615,36 @@ HTML = r"""<!doctype html>
       .checks        { grid-template-columns: 1fr; }
       .checks-inline { grid-template-columns: 1fr 1fr; }
 
-      /* On mobile: free scrolling, no fixed 100vh sections */
-      html { scroll-snap-type: none; }
-      .page-section {
-        height: auto;
-        overflow: visible;
-      }
-      .page-section > .wrap {
-        flex: none;
-      }
+      /* Sections expand freely; snap at controls/chart level instead */
+      html { scroll-snap-type: y proximity; }
+      .page-section { height: auto; overflow: visible; scroll-snap-align: none; }
+      .page-section > .wrap { flex: none; }
 
-      /* Controls block: at least full screen height so it feels like one page */
+      /* Controls: natural height, snaps at top, small cushion before chart */
       .section-controls {
-        min-height: 100dvh;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        padding-bottom: 8px;
+        scroll-snap-align: start;
+        padding-bottom: 20px;
       }
 
-      /* Chart block: fixed height, visually its own screen */
+      /* Chart: portrait — square-ish, snaps at top, clear gap after */
       .section-chart {
-        height: 75vw;
-        min-height: 260px;
-        max-height: 92vw;
+        height: min(75vw, 72vh);
+        min-height: 220px;
         flex: none;
         margin-top: 0;
-        margin-bottom: 24px;
+        margin-bottom: 32px;
+        scroll-snap-align: start;
       }
       .section-chart > div {
         height: 100%;
+      }
+    }
+
+    /* Landscape on small screens: chart fills the full screen height */
+    @media (max-width: 900px) and (orientation: landscape) and (max-height: 600px) {
+      .section-chart {
+        height: calc(100svh - 16px);
+        min-height: 0;
       }
     }
   </style>
