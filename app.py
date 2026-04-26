@@ -2314,7 +2314,8 @@ s4InputTopN.addEventListener("input", () => {
   clearTimeout(s4DebounceTimer);
   s4DebounceTimer = setTimeout(loadAgeStats, 400);
 });
-();
+
+loadAgeStats();
 
 // ── Responsive: split tall control panels from chart on mobile ────────────────
 function getOffsetTopInSection(el, section) {
