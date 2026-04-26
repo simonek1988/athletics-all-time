@@ -577,8 +577,29 @@ HTML = r"""<!doctype html>
     }
 
     @media (max-width: 700px) {
-      .grid   { grid-template-columns: 1fr; }
-      .checks { grid-template-columns: 1fr; }
+      .grid          { grid-template-columns: 1fr; }
+      .checks        { grid-template-columns: 1fr; }
+      .checks-inline { grid-template-columns: 1fr 1fr; }
+
+      /* When controls fill >70 % of screen, chart becomes its own snap target */
+      .tall-controls {
+        height: auto;
+        overflow: visible;
+      }
+      .tall-controls > .wrap {
+        flex: none;
+      }
+      .tall-controls #plot-wrap,
+      .tall-controls #pace-plot-wrap,
+      .tall-controls #age-plot-wrap,
+      .tall-controls #age-trend-wrap {
+        height: 75vw;
+        min-height: 220px;
+        max-height: 75vw;
+        flex: none;
+        margin-top: 8px;
+        scroll-snap-align: start;
+      }
     }
 
     .page-section {
@@ -2293,8 +2314,33 @@ s4InputTopN.addEventListener("input", () => {
   clearTimeout(s4DebounceTimer);
   s4DebounceTimer = setTimeout(loadAgeStats, 400);
 });
+();
 
-loadAgeStats();
+// ── Responsive: split tall control panels from chart on mobile ────────────────
+function getOffsetTopInSection(el, section) {
+  let top = 0, node = el;
+  while (node && node !== section) { top += node.offsetTop; node = node.offsetParent; }
+  return top;
+}
+
+function updateLayout() {
+  const mobile = window.innerWidth <= 700;
+  const vh     = window.innerHeight;
+  document.querySelectorAll(".page-section").forEach(section => {
+    const chartWrap = section.querySelector(
+      "#plot-wrap, #pace-plot-wrap, #age-plot-wrap, #age-trend-wrap"
+    );
+    if (!chartWrap) return;
+    section.classList.remove("tall-controls");
+    if (!mobile) return;
+    const chartTop = getOffsetTopInSection(chartWrap, section);
+    if (chartTop > vh * 0.70) section.classList.add("tall-controls");
+  });
+}
+
+window.addEventListener("resize", updateLayout);
+document.addEventListener("DOMContentLoaded", updateLayout);
+updateLayout();
 </script>
 
 </body>
