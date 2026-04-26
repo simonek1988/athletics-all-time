@@ -1,0 +1,12 @@
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Data files (large / auto-generated)
+event_data/
+
+# Saved reference HTML pages (third-party / copyright)
+references/
