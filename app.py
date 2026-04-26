@@ -635,45 +635,31 @@ HTML = r"""<!doctype html>
       .checks        { grid-template-columns: 1fr 1fr; }
       .checks-inline { grid-template-columns: 1fr 1fr; }
 
-      /* Each section is a normal full-screen snap stop */
-      html { scroll-snap-type: y mandatory; }
-      .page-section {
-        height: 100svh;
-        overflow: hidden;
-        scroll-snap-align: start;
-        display: flex;
-        flex-direction: row;
-      }
-      .page-section > .wrap {
-        flex: 1;
-        min-height: 0;
-        display: flex;
-        flex-direction: row;
-        padding: 8px;
-        gap: 10px;
-        max-width: none;
-      }
-      /* Controls scroll vertically within their column */
+      /* Same free-scroll approach as portrait, just compressed */
+      html { scroll-snap-type: y proximity; }
+      .page-section { height: auto; overflow: visible; scroll-snap-align: none; }
+      .page-section > .wrap { flex: none; max-width: none; }
+
       .section-controls {
-        flex: 0 0 300px;
-        overflow-y: auto;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        padding-right: 6px;
+        scroll-snap-align: start;
+        padding-bottom: 12px;
       }
-      /* Chart fills remaining width */
+
+      /* Chart fills full width, height based on viewport */
       .section-chart {
-        flex: 1;
-        min-width: 0;
-        height: 100%;
-        margin: 0;
+        height: calc(100svh - 16px);
+        min-height: 180px;
+        flex: none;
+        margin-top: 0;
+        margin-bottom: 24px;
+        scroll-snap-align: start;
       }
       .section-chart > div { height: 100%; }
+
       /* Compress vertical spacing */
-      h1 { font-size: 15px; margin-bottom: 2px; }
+      h1 { font-size: 14px; margin-bottom: 2px; }
       .subtitle { display: none; }
-      .panel { padding: 6px 8px; }
+      .panel { padding: 4px 8px; }
       .site-footer { display: none; }
     }
   </style>
@@ -1433,8 +1419,8 @@ function redraw() {
   const layout = {
     ...DARK,
     font:   { family: '"Courier New", monospace', color: "#fff", size: 13 },
-    title:  { text: cachedData.event || "", font: { size: 15 }, x: 0.04 },
-    margin: { t: mobile ? 72 : 44, b: 56, l: 62, r: 18 },
+    title:  { text: mobile ? "" : (cachedData.event || ""), font: { size: 15 }, x: 0.04 },
+    margin: { t: mobile ? 16 : 44, b: 56, l: 62, r: 18 },
     barmode: "overlay",
     bargap:  0,
     xaxis: {
@@ -1727,12 +1713,13 @@ async function updatePacePlot() {
   const paceMin = Math.min(...allPaces);
   const paceMax = Math.max(...allPaces);
   const ticks   = makePaceTicks(paceMin * 0.97, paceMax * 1.03);
+  const mobile  = window.matchMedia("(max-width: 700px), (max-height: 600px) and (orientation: landscape)").matches;
 
   const layout = {
     ...DARK,
     font:   { family: '"Courier New", monospace', color: "#fff", size: 13 },
-    title:  { text: "Pace vs. Distance", font: { size: 15 }, x: 0.04 },
-    margin: { t: 44, b: 56, l: 88, r: 18 },
+    title:  { text: mobile ? "" : "Pace vs. Distance", font: { size: 15 }, x: 0.04 },
+    margin: { t: mobile ? 16 : 44, b: 56, l: 88, r: 18 },
     xaxis: (() => {
       const allDists = combos.flatMap(c => (series[c] || []).map(p => p.distance));
       const minD = Math.min(...allDists);
@@ -2097,12 +2084,13 @@ function redrawAge() {
   } else {
     yaxisExtra = { range: [0, yMax * 1.08] };
   }
+  const mobile = window.matchMedia("(max-width: 700px), (max-height: 600px) and (orientation: landscape)").matches;
 
   const layout = {
     ...DARK,
     font:    { family: '"Courier New", monospace', color: "#fff", size: 13 },
-    title:   { text: s3CachedData.event || "", font: { size: 15 }, x: 0.04 },
-    margin:  { t: 44, b: 56, l: 62, r: 18 },
+    title:  { text: mobile ? "" : (s3CachedData.event || ""), font: { size: 15 }, x: 0.04 },
+    margin:  { t: mobile ? 16 : 44, b: 56, l: 62, r: 18 },
     barmode: "overlay",
     bargap:  0,
     xaxis: {
@@ -2371,12 +2359,13 @@ function redrawAgeTrend() {
     d >= 10000 ? (d / 1000) + "k" : d >= 1000 ? (d / 1000) + "k" : String(d));
 
   const nEvents = events.filter(e => combos.some(c => e.combos[c])).length;
+  const mobile  = window.matchMedia("(max-width: 700px), (max-height: 600px) and (orientation: landscape)").matches;
 
   const layout = {
     ...DARK,
     font:    { family: '"Courier New", monospace', color: "#fff", size: 13 },
-    title:   { text: "Age Trends by Event", font: { size: 15 }, x: 0.04 },
-    margin:  { t: 44, b: 56, l: 62, r: 18 },
+    title:   { text: mobile ? "" : "Age Trends by Event", font: { size: 15 }, x: 0.04 },
+    margin:  { t: mobile ? 16 : 44, b: 56, l: 62, r: 18 },
     xaxis: {
       ...AXIS_BASE,
       title: { ...AXIS_BASE.title, text: "Distance (m)" },
