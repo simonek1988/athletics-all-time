@@ -576,32 +576,6 @@ HTML = r"""<!doctype html>
       justify-content: space-between;
     }
 
-    @media (max-width: 700px) {
-      .grid          { grid-template-columns: 1fr; }
-      .checks        { grid-template-columns: 1fr; }
-      .checks-inline { grid-template-columns: 1fr 1fr; }
-
-      /* When controls fill >70 % of screen, chart becomes its own snap target */
-      .tall-controls {
-        height: auto;
-        overflow: visible;
-      }
-      .tall-controls > .wrap {
-        flex: none;
-      }
-      .tall-controls #plot-wrap,
-      .tall-controls #pace-plot-wrap,
-      .tall-controls #age-plot-wrap,
-      .tall-controls #age-trend-wrap {
-        height: 75vw;
-        min-height: 220px;
-        max-height: 75vw;
-        flex: none;
-        margin-top: 8px;
-        scroll-snap-align: start;
-      }
-    }
-
     .page-section {
       height: 100vh;
       width: 100%;
@@ -621,11 +595,61 @@ HTML = r"""<!doctype html>
       flex-direction: column;
       padding-bottom: 10px;
     }
+    /* Desktop: section-chart grows to fill remaining space */
+    .section-chart {
+      flex: 1;
+      min-height: 0;
+      margin-top: 18px;
+      border: 1px solid var(--border2);
+      background: var(--panel);
+    }
+    .section-chart > div {
+      height: 100%;
+    }
+
+    @media (max-width: 700px) {
+      .grid          { grid-template-columns: 1fr; }
+      .checks        { grid-template-columns: 1fr; }
+      .checks-inline { grid-template-columns: 1fr 1fr; }
+
+      /* On mobile: free scrolling, no fixed 100vh sections */
+      html { scroll-snap-type: none; }
+      .page-section {
+        height: auto;
+        overflow: visible;
+      }
+      .page-section > .wrap {
+        flex: none;
+      }
+
+      /* Controls block: at least full screen height so it feels like one page */
+      .section-controls {
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-bottom: 8px;
+      }
+
+      /* Chart block: fixed height, visually its own screen */
+      .section-chart {
+        height: 75vw;
+        min-height: 260px;
+        max-height: 92vw;
+        flex: none;
+        margin-top: 0;
+        margin-bottom: 24px;
+      }
+      .section-chart > div {
+        height: 100%;
+      }
+    }
   </style>
 </head>
 <body>
 <section class="page-section">
 <div class="wrap">
+  <div class="section-controls">
   <h1>Athletics All-Time Performances</h1>
   <p class="subtitle">Distribution of best-ever athletes across athletics events.</p>
 
@@ -711,8 +735,12 @@ HTML = r"""<!doctype html>
     </div>
   </div>
 
-  <div id="plot-wrap"><div id="plot"></div></div>
+  </div><!-- /.section-controls -->
+
+  <div class="section-chart">
+  <div id="plot-wrap"><div id="plot" style="height:100%"></div></div>
   <div id="status" class="status"></div>
+  </div><!-- /.section-chart -->
 
   <div class="site-footer">
     <span>© Simon Ek. Data © World Athletics.</span>
@@ -722,6 +750,7 @@ HTML = r"""<!doctype html>
 
 <section class="page-section" id="s2">
 <div class="wrap">
+  <div class="section-controls">
   <h1>Pace vs. Distance</h1>
   <p class="subtitle">Average pace of the top-N athletes across flat running events.</p>
 
@@ -806,10 +835,14 @@ HTML = r"""<!doctype html>
     </div>
   </div>
 
-  <div id="pace-plot-wrap" style="margin-top:18px;border:1px solid var(--border2);background:var(--panel);flex:1;min-height:0">
+  </div><!-- /.section-controls -->
+
+  <div class="section-chart">
+  <div id="pace-plot-wrap">
     <div id="pace-plot" style="height:100%"></div>
   </div>
   <div id="s2-status" class="status"></div>
+  </div><!-- /.section-chart -->
 
   <div class="site-footer">
     <span>© Simon Ek. Data © World Athletics.</span>
@@ -819,6 +852,7 @@ HTML = r"""<!doctype html>
 
 <section class="page-section" id="s3">
 <div class="wrap">
+  <div class="section-controls">
   <h1>Peak Age Distribution</h1>
   <p class="subtitle">Age of athletes at the time of their best performance.</p>
 
@@ -890,10 +924,14 @@ HTML = r"""<!doctype html>
     </div>
   </div>
 
-  <div id="age-plot-wrap" style="margin-top:18px;border:1px solid var(--border2);background:var(--panel);flex:1;min-height:0">
+  </div><!-- /.section-controls -->
+
+  <div class="section-chart">
+  <div id="age-plot-wrap">
     <div id="age-plot" style="height:100%"></div>
   </div>
   <div id="s3-status" class="status"></div>
+  </div><!-- /.section-chart -->
 
   <div class="site-footer">
     <span>© Simon Ek. Data © World Athletics.</span>
@@ -903,6 +941,7 @@ HTML = r"""<!doctype html>
 
 <section class="page-section" id="s4">
 <div class="wrap">
+  <div class="section-controls">
   <h1>Age Trends by Event</h1>
   <p class="subtitle">How athlete peak age varies across running distances.</p>
 
@@ -975,10 +1014,14 @@ HTML = r"""<!doctype html>
     </div>
   </div>
 
-  <div id="age-trend-wrap" style="margin-top:18px;border:1px solid var(--border2);background:var(--panel);flex:1;min-height:0">
+  </div><!-- /.section-controls -->
+
+  <div class="section-chart">
+  <div id="age-trend-wrap">
     <div id="age-trend-plot" style="height:100%"></div>
   </div>
   <div id="s4-status" class="status"></div>
+  </div><!-- /.section-chart -->
 
   <div class="site-footer">
     <span>© Simon Ek. Data © World Athletics.</span>
@@ -1140,17 +1183,26 @@ function scheduleRedraw() {
 
 // ── Histogram helper ─────────────────────────────────────────────────────────
 function computeHistogram(values, binStart, binSize, numBins) {
+  // Determine rounding precision from binSize (e.g. 0.05 → 4 dp) to eliminate
+  // floating point noise in edge labels (9.549999… → 9.55).
+  const prec   = Math.max(0, Math.ceil(-Math.log10(binSize))) + 2;
+  const snapFn = x => parseFloat(x.toFixed(prec));
+
   const counts = new Array(numBins).fill(0);
+  // Add a small epsilon before floor() to fix IEEE 754 artefacts: e.g.
+  // (9.59 - 9.58) / 0.01 = 0.9999999… → floor gives 0 (wrong).
+  // Epsilon of 1e-9 is far smaller than any real measurement difference.
+  const EPS = 1e-9;
   for (const v of values) {
-    const idx = Math.min(numBins - 1, Math.floor((v - binStart) / binSize));
+    const idx = Math.min(numBins - 1, Math.floor((v - binStart) / binSize + EPS));
     if (idx >= 0) counts[idx]++;
   }
   const centers = [], edges0 = [], edges1 = [];
   for (let i = 0; i < numBins; i++) {
-    const e0 = binStart + i * binSize;
+    const e0 = snapFn(binStart + i * binSize);
     edges0.push(e0);
-    edges1.push(e0 + binSize);
-    centers.push(e0 + binSize / 2);
+    edges1.push(snapFn(e0 + binSize));
+    centers.push(snapFn(e0 + binSize / 2));
   }
   return { centers, counts, edges0, edges1 };
 }
@@ -1243,9 +1295,18 @@ function redraw() {
     return;
   }
 
-  // Bin size
-  const numBins = Math.max(2, parseInt(inputBins.value) || 100);
-  const binSz   = (currentRange[1] - currentRange[0]) / numBins;
+  // Bin size — prefer the explicit bin size field when the user has set it,
+  // otherwise derive from number-of-bins. This prevents precision loss from
+  // the round-trip through integer numBins.
+  let binSz, numBins;
+  const explicitSize = parseFloat(inputBinSize.value);
+  if (explicitSize > 0 && document.activeElement !== inputBins) {
+    binSz   = explicitSize;
+    numBins = Math.max(2, Math.ceil((currentRange[1] - currentRange[0]) / binSz));
+  } else {
+    numBins = Math.max(2, parseInt(inputBins.value) || 100);
+    binSz   = (currentRange[1] - currentRange[0]) / numBins;
+  }
 
   // Sync binsize field (unless user is actively editing it)
   if (document.activeElement !== inputBinSize) {
@@ -1260,7 +1321,9 @@ function redraw() {
 
   // Build traces
   const normalize = chkNormalize.checked;
-  const binStart  = currentRange[0];
+  // Snap bin start to the nearest multiple of binSz below the minimum,
+  // so all bin edges are integer multiples of the bin size.
+  const binStart  = Math.floor(currentRange[0] / binSz) * binSz;
   const traces = combosWanted
     .filter(c => displayData[c] && displayData[c].length)
     .map(c => {
@@ -2316,32 +2379,6 @@ s4InputTopN.addEventListener("input", () => {
 });
 
 loadAgeStats();
-
-// ── Responsive: split tall control panels from chart on mobile ────────────────
-function getOffsetTopInSection(el, section) {
-  let top = 0, node = el;
-  while (node && node !== section) { top += node.offsetTop; node = node.offsetParent; }
-  return top;
-}
-
-function updateLayout() {
-  const mobile = window.innerWidth <= 700;
-  const vh     = window.innerHeight;
-  document.querySelectorAll(".page-section").forEach(section => {
-    const chartWrap = section.querySelector(
-      "#plot-wrap, #pace-plot-wrap, #age-plot-wrap, #age-trend-wrap"
-    );
-    if (!chartWrap) return;
-    section.classList.remove("tall-controls");
-    if (!mobile) return;
-    const chartTop = getOffsetTopInSection(chartWrap, section);
-    if (chartTop > vh * 0.70) section.classList.add("tall-controls");
-  });
-}
-
-window.addEventListener("resize", updateLayout);
-document.addEventListener("DOMContentLoaded", updateLayout);
-updateLayout();
 </script>
 
 </body>
