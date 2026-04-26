@@ -694,7 +694,7 @@ HTML = r"""<!doctype html>
   <div id="status" class="status"></div>
 
   <div class="site-footer">
-    <span>Personal / research use only. Data © World Athletics.</span>
+    <span>© Simon Ek. Data © World Athletics.</span>
   </div>
 </div>
 </section>
@@ -791,7 +791,7 @@ HTML = r"""<!doctype html>
   <div id="s2-status" class="status"></div>
 
   <div class="site-footer">
-    <span>Personal / research use only. Data © World Athletics.</span>
+    <span>© Simon Ek. Data © World Athletics.</span>
   </div>
 </div>
 </section>
@@ -875,7 +875,7 @@ HTML = r"""<!doctype html>
   <div id="s3-status" class="status"></div>
 
   <div class="site-footer">
-    <span>Personal / research use only. Data © World Athletics.</span>
+    <span>© Simon Ek. Data © World Athletics.</span>
   </div>
 </div>
 </section>
@@ -960,7 +960,7 @@ HTML = r"""<!doctype html>
   <div id="s4-status" class="status"></div>
 
   <div class="site-footer">
-    <span>Personal / research use only. Data © World Athletics.</span>
+    <span>© Simon Ek. Data © World Athletics.</span>
   </div>
 </div>
 </section>
@@ -979,7 +979,7 @@ HTML = r"""<!doctype html>
       collected in April 2026.
     </p>
     <p style="color:var(--muted);line-height:1.75;font-size:13px;margin-top:14px">
-      Personal and research use only. Data &copy; World Athletics.
+      Personal and research use only. Data &copy; World Athletics. © Simon Ek
     </p>
   </div>
 </div>
