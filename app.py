@@ -554,14 +554,6 @@ HTML = r"""<!doctype html>
     }
     .ascii-check .label { color: var(--text); }
 
-    #plot-wrap {
-      margin-top: 18px;
-      border: 1px solid var(--border2);
-      background: var(--panel);
-      flex: 1;
-      min-height: 0;
-    }
-
     #plot { height: 100%; }
 
     .status {
@@ -610,23 +602,22 @@ HTML = r"""<!doctype html>
       height: 100%;
     }
 
-    @media (max-width: 700px) {
+    /* ── Mobile portrait ─────────────────────────────────────────── */
+    @media (max-width: 700px) and (orientation: portrait) {
       .grid          { grid-template-columns: 1fr; }
       .checks        { grid-template-columns: 1fr; }
       .checks-inline { grid-template-columns: 1fr 1fr; }
 
-      /* Sections expand freely; snap at controls/chart level instead */
+      /* Free-scroll with proximity snapping at block level */
       html { scroll-snap-type: y proximity; }
       .page-section { height: auto; overflow: visible; scroll-snap-align: none; }
       .page-section > .wrap { flex: none; }
 
-      /* Controls: natural height, snaps at top, small cushion before chart */
       .section-controls {
         scroll-snap-align: start;
         padding-bottom: 20px;
       }
 
-      /* Chart: portrait — square-ish, snaps at top, clear gap after */
       .section-chart {
         height: min(75vw, 72vh);
         min-height: 220px;
@@ -635,17 +626,55 @@ HTML = r"""<!doctype html>
         margin-bottom: 32px;
         scroll-snap-align: start;
       }
-      .section-chart > div {
-        height: 100%;
-      }
+      .section-chart > div { height: 100%; }
     }
 
-    /* Landscape on small screens: chart fills the full screen height */
-    @media (max-width: 900px) and (orientation: landscape) and (max-height: 600px) {
-      .section-chart {
-        height: calc(100svh - 16px);
-        min-height: 0;
+    /* ── Mobile landscape ────────────────────────────────────────── */
+    @media (max-height: 600px) and (orientation: landscape) {
+      .grid          { grid-template-columns: 1fr 1fr; }
+      .checks        { grid-template-columns: 1fr 1fr; }
+      .checks-inline { grid-template-columns: 1fr 1fr; }
+
+      /* Each section is a normal full-screen snap stop */
+      html { scroll-snap-type: y mandatory; }
+      .page-section {
+        height: 100svh;
+        overflow: hidden;
+        scroll-snap-align: start;
+        display: flex;
+        flex-direction: row;
       }
+      .page-section > .wrap {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: row;
+        padding: 8px;
+        gap: 10px;
+        max-width: none;
+      }
+      /* Controls scroll vertically within their column */
+      .section-controls {
+        flex: 0 0 300px;
+        overflow-y: auto;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding-right: 6px;
+      }
+      /* Chart fills remaining width */
+      .section-chart {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        margin: 0;
+      }
+      .section-chart > div { height: 100%; }
+      /* Compress vertical spacing */
+      h1 { font-size: 15px; margin-bottom: 2px; }
+      .subtitle { display: none; }
+      .panel { padding: 6px 8px; }
+      .site-footer { display: none; }
     }
   </style>
 </head>
@@ -1108,6 +1137,27 @@ const DARK = {
   plot_bgcolor:  "#040f22",
 };
 
+// Returns a Plotly legend config: horizontal above-plot on mobile, default otherwise
+function legendLayout() {
+  const mobile = window.matchMedia("(max-width: 700px), (max-height: 600px) and (orientation: landscape)").matches;
+  if (mobile) {
+    return {
+      font:        { family: '"Courier New", monospace', size: 11 },
+      bgcolor:     "rgba(0,0,0,0)",
+      borderwidth: 0,
+      orientation: "h",
+      x: 0, y: 1.04,
+      xanchor: "left", yanchor: "bottom",
+    };
+  }
+  return {
+    font:        { family: '"Courier New", monospace', size: 13 },
+    bgcolor:     "rgba(0,0,0,.45)",
+    bordercolor: "rgba(255,255,255,.25)",
+    borderwidth: 1,
+  };
+}
+
 const AXIS_BASE = {
   color:          "rgba(255,255,255,.80)",
   gridcolor:      "rgba(255,255,255,.12)",
@@ -1379,11 +1429,12 @@ function redraw() {
     };
   }
 
+  const mobile = window.matchMedia("(max-width: 700px), (max-height: 600px) and (orientation: landscape)").matches;
   const layout = {
     ...DARK,
     font:   { family: '"Courier New", monospace', color: "#fff", size: 13 },
     title:  { text: cachedData.event || "", font: { size: 15 }, x: 0.04 },
-    margin: { t: 44, b: 56, l: 62, r: 18 },
+    margin: { t: mobile ? 72 : 44, b: 56, l: 62, r: 18 },
     barmode: "overlay",
     bargap:  0,
     xaxis: {
@@ -1398,12 +1449,7 @@ function redraw() {
       title: { ...AXIS_BASE.title, text: chkNormalize.checked ? "Fraction of athletes" : "Number of athletes" },
       type:  chkLogY.checked ? "log" : "linear",
     },
-    legend: {
-      font:        { family: '"Courier New", monospace', size: 13 },
-      bgcolor:     "rgba(0,0,0,.45)",
-      bordercolor: "rgba(255,255,255,.25)",
-      borderwidth: 1,
-    },
+    legend: legendLayout(),
   };
 
   const config = {
@@ -1714,12 +1760,7 @@ async function updatePacePlot() {
       tickmode: "array",
       range:    [paceMax * 1.03, paceMin * 0.97],
     },
-    legend: {
-      font:        { family: '"Courier New", monospace', size: 13 },
-      bgcolor:     "rgba(0,0,0,.45)",
-      bordercolor: "rgba(255,255,255,.25)",
-      borderwidth: 1,
-    },
+    legend: legendLayout(),
   };
 
   const config = {
@@ -2081,12 +2122,7 @@ function redrawAge() {
     },
     shapes,
     annotations: annots,
-    legend: {
-      font:        { family: '"Courier New", monospace', size: 13 },
-      bgcolor:     "rgba(0,0,0,.45)",
-      bordercolor: "rgba(255,255,255,.25)",
-      borderwidth: 1,
-    },
+    legend: legendLayout(),
   };
 
   const config = {
@@ -2355,12 +2391,7 @@ function redrawAgeTrend() {
       ...AXIS_BASE,
       title: { ...AXIS_BASE.title, text: "Age (years)" },
     },
-    legend: {
-      font:        { family: '"Courier New", monospace', size: 13 },
-      bgcolor:     "rgba(0,0,0,.45)",
-      bordercolor: "rgba(255,255,255,.25)",
-      borderwidth: 1,
-    },
+    legend: legendLayout(),
   };
 
   s4LastLayout = layout;
